@@ -1,18 +1,24 @@
 module.exports = {
-  css: {
-    loaderOptions: {
-      stylus: {
-        'resolve url': true,
-        'import': [
-          './src/theme'
-        ]
-      }
-    }
-  },
-  pluginOptions: {
-    'cube-ui': {
-      postCompile: true,
-      theme: true
-    }
-  }
+    devServer: {
+		proxy: {
+			'/api': {
+				target: 'http://127.0.0.1:7001',
+				changeOrigin: true
+			}
+		}
+	},
+    configureWebpack: {
+		resolve: {
+			alias: {
+				'assets': '@/assets',
+				'img': '@/assets/images',
+				'components': '@/components',
+				'pages': '@/pages',
+				'views': '@/views'
+			}
+		}
+	},
+
+    runtimeCompiler: true,
+    productionSourceMap: false
 }
