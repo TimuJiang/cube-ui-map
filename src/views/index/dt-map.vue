@@ -1,11 +1,15 @@
 <template lang='pug'>
-	.dt-map
-		#dt-map__content
+  .dt-map
+    #dt-map__content
+    city-button(v-if="map" :map="map" @change-city="onChangeCity")
 </template>
 
 <script>
+  import CityButton from './city-button'
+
   export default {
     name: 'dt-map',
+    components: { CityButton },
     data () {
       return {
         map: '',
@@ -18,13 +22,13 @@
           type: 2,
           text: '普通图'
         }]
-	  }
+      }
     },
-    mounted() {
+    mounted () {
       this.initMap()
     },
-	methods: {
-      initMap(type) {
+    methods: {
+      initMap (type) {
         this.map && this.map.destroy()
         this.type = type || 2
         let myType = type === 1 ? {
@@ -45,21 +49,25 @@
         if (this.city) {
           this.map.setCity(this.city)
         }
+      },
+      onChangeCity(city) {
+        this.map.setCity(city)
       }
-	}
+    }
   }
 </script>
 <style lang="scss">
-	#dt-map__content {
-		width: 100%;
-		height: 100%;
-	}
+  #dt-map__content {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>
 <style lang="scss" scoped>
-	.dt-map {
-		position: absolute;
-		top: 0;
-		height: 100%;
-		width: 100%;
-	}
+  .dt-map {
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
 </style>

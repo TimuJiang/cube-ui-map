@@ -1,19 +1,25 @@
 <template lang='pug'>
-	.index
-		cube-button() HAHA
-		dt-map
+  .index
+    dt-map()
 </template>
 
 <script>
-	import DtMap from '@/components/dt-map'
-	export default {
-		name: 'index',
-	components: { DtMap }
-	}
+  import DtMap from './index/dt-map'
+
+  export default {
+    name: 'index',
+    components: { DtMap },
+    data () {
+      return {}
+    },
+    mounted () {
+    },
+    methods: {}
+  }
 </script>
 <style lang="scss" scoped>
-	.index {
-		width: 100vw;
-		height: 100vh;
-	}
+  .index {
+    width: 100vw;
+    height: 100vh;
+  }
 </style>
