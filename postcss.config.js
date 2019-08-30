@@ -2,7 +2,7 @@ module.exports = {
   plugins: {
     autoprefixer: {},
     'postcss-px2rem': {
-      remUnit: 28
+      remUnit: 37.5
     }
   }
 }
