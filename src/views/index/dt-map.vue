@@ -1,27 +1,27 @@
 <template lang='pug'>
   .dt-map
     #dt-map__content
-    city-button(v-if="map" :map="map" @change-city="onChangeCity")
+    .tool-bar
+      city-button(v-if="map && !search" :map="map" @change-city="onChangeCity")
+      brand-button(v-if="map && !search" :map="map" @change-city="onChangeBrand")
+      search-button(v-if="map && !search" :map="map" @click.native="onToggle")
+      search-input(v-if="map && search" @close="onClose")
 </template>
 
 <script>
   import CityButton from './city-button'
-
+  import BrandButton from './brand-button'
+  import SearchButton from './search-button'
+  import SearchInput from './search-input'
   export default {
     name: 'dt-map',
-    components: { CityButton },
+    components: { CityButton, BrandButton, SearchButton, SearchInput },
     data () {
       return {
         map: '',
         mouseTool: '',
         geolocation: '',
-        typeList: [{
-          type: 1,
-          text: '卫星图'
-        }, {
-          type: 2,
-          text: '普通图'
-        }]
+        search: false
       }
     },
     mounted () {
@@ -52,6 +52,13 @@
       },
       onChangeCity(city) {
         this.map.setCity(city)
+      },
+      onChangeBrand() {},
+      onToggle() {
+        this.search = true
+      },
+      onClose() {
+        this.search = false
       }
     }
   }
@@ -69,5 +76,16 @@
     position: relative;
     height: 100%;
     width: 100%;
+    .tool-bar {
+      display: flex;
+      box-sizing: border-box;
+      position: absolute;
+      width: 100%;
+      z-index: 2;
+      background: #ffffff;
+      padding: 16px 20px;
+      align-items: center;
+
+    }
   }
 </style>

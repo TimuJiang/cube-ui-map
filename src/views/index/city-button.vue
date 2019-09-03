@@ -1,6 +1,6 @@
 <template lang='pug'>
   .city-button
-    cube-button(:light="true"  @click="showAddressPicker") {{currentCity}} (点击切换)
+    cube-button(:light="true"  @click="showAddressPicker" icon="cubeic-select") {{currentCity}} (点击切换)
 </template>
 
 <script>
@@ -27,7 +27,6 @@
         this.currentProvince = result.province
         this.init()
       })
-
     },
     methods: {
       showAddressPicker () {
@@ -61,8 +60,6 @@
           this.defaultSelectIndex = [index1, index2]
           this.addressData.push(data)
         })
-        console.log(index1)
-        console.log(index2)
         this.addressPicker = this.$createCascadePicker({
           title: '选择城市',
           zIndex: 999,
@@ -94,9 +91,6 @@
 </script>
 <style lang="scss" scoped>
   .city-button {
-    position: absolute;
-    z-index: 2;
-    top: 20px;
-    left: 20px;
+    flex: 1;
   }
 </style>
