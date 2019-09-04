@@ -34,7 +34,7 @@
       flex: auto;
     }
     .link-button {
-      font-size: 32px;
+      font-size: 16px;
       margin-left: 20px;
       color: #666666;
     }
@@ -54,7 +54,7 @@
       height: 60px;
       line-height: 60px;
       padding-left: 20px;
-      font-size: 28px;
+      font-size: 14px;
     }
   }
 </style>

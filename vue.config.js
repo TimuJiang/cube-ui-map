@@ -1,7 +1,7 @@
 module.exports = {
   devServer: {
     proxy: {
-      '/map': {
+      '/capitalization': {
         target: 'http://10.200.147.122:7109',
         changeOrigin: true
       }

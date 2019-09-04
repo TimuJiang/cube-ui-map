@@ -1,6 +1,5 @@
 <template lang='pug'>
-  .city-button
-    cube-button(:light="true"  @click="showAddressPicker" icon="cubeic-select") {{currentCity}} (点击切换)
+  cube-button.city-button(:light="true"  @click="showAddressPicker" icon="cubeic-select") {{currentCity}}
 </template>
 
 <script>
@@ -26,6 +25,7 @@
         this.currentCity = result.city
         this.currentProvince = result.province
         this.init()
+        this.$emit('change-city', this.currentCity)
       })
     },
     methods: {
@@ -89,8 +89,16 @@
     }
   }
 </script>
+<style scoped>
+  .city-button  >>> .cubeic-select {
+
+  }
+</style>
 <style lang="scss" scoped>
   .city-button {
-    flex: 1;
+    flex: 2;
+    padding: 10px 16px;
+    overflow:hidden;
+    text-overflow: ellipsis;
   }
 </style>

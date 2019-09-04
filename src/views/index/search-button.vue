@@ -12,9 +12,8 @@
   .search-button {
     flex: 1;
     text-align: right;
-
     .cubeic-search {
-      font-size: 48px;
+      font-size: 24px;
       color: #666666;
     }
   }

@@ -1,6 +1,5 @@
 <template lang='pug'>
-  .brand-button
-    cube-button(:light="true"  @click="showBrandPicker" icon="cubeic-select") {{currentBrand.text}}
+    cube-button.brand-button(:light="true"  @click="showBrandPicker" icon="cubeic-select") {{currentBrand.text}}
 </template>
 
 <script>
@@ -48,5 +47,6 @@
   .brand-button {
     flex: 1;
     margin-left: 20px;
+    padding: 10px 16px;
   }
 </style>
