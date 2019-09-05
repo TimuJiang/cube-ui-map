@@ -24,11 +24,14 @@
         mouseTool: '',
         geolocation: '',
         search: false,
+        brand: '',
         currentCity: '',
         jsxList: [],
         jxsMarkerList: [],
         businessList: [],
-        businessMarkerList: []
+        businessMarkerList: [],
+        businessMap: {},
+        polylineList: []
       }
     },
     mounted () {
@@ -47,6 +50,7 @@
       onChangeCity (city) {
         this.map.setCity(city)
         this.currentCity = city
+        this.map.clearMap()
         this.loadData()
         this.loadBusinessDistrict()
       },
@@ -73,11 +77,10 @@
           })
       },
       addJxsList () {
-        this.map.clearMap(this.jxsMarkerList)
         this.jxsMarkerList = []
         let marker
         let icon
-        const { Icon, Size, Pixel, Marker } = AMap
+        const { Icon, Size, Pixel, Marker, Polyline } = AMap
         this.jsxList.forEach(j => {
           // eslint-disable-next-line no-undef
           let url = `./images/jxs_${j.brand}.png`
@@ -88,13 +91,9 @@
           })
           marker = new Marker({
             icon: icon,
+            zIndex: 110,
             position: [j.longitude, j.latitude],
-            offset: new Pixel(-18, -12.5)
-          })
-          marker.setLabel({
-            offset: new Pixel(20, 20),
-            content: j.name,
-            direction: 'center'
+            offset: new Pixel(-9, -25)
           })
           this.jxsMarkerList.push(marker)
         })
@@ -102,26 +101,96 @@
         this.map.setFitView(this.jxsMarkerList, true, [20, 20, 20, 20])
       },
       addBusinessList () {
-        this.map.clearMap(this.businessMarkerList)
         this.businessMarkerList = []
+        this.businessMap = {}
         let marker
         let icon
-        const { Icon, Size, Pixel } = AMap
+        let text
+        const { Icon, Size, Pixel, Marker, Text } = AMap
         this.businessList.forEach(j => {
+          this.businessMap[j.id] = j
           let url = `./images/b-bg.png`
           icon = new Icon({
             size: new Size(90, 90),
             image: url,
             imageSize: new Size(90, 90)
           })
-          marker = new AMap.Marker({
+          marker = new Marker({
             icon: icon,
             position: [j.longitude, j.latitude],
             offset: new Pixel(-45, -45)
           })
+          text = new Text({
+            text: j.bussCircle,
+            anchor: 'center',
+            draggable: false,
+            style: {
+              'background': 'transparent',
+              'width': '60px',
+              'border-width': 0,
+              'text-align': 'center',
+              'font-size': '14px',
+              'word-break': 'break-all',
+              'white-space': 'pre-wrap',
+              'color': '#FFFFFF'
+            },
+            position: [j.longitude, j.latitude]
+          })
           this.businessMarkerList.push(marker)
-          this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
+          this.businessMarkerList.push(text)
         })
+        this.map.add(this.businessMarkerList)
+        this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
+        this.drawPolyline()
+      },
+      drawPolyline () {
+        let target
+        let polyline
+        let text
+        this.polylineList = []
+        const { Text, Polyline, LngLat } = AMap
+        this.businessList.forEach(b => {
+          target = this.businessMap[b.connects]
+          polyline = new Polyline({
+            path: [[b.longitude, b.latitude], [target.longitude, target.latitude]],
+            borderWeight: 2,
+            strokeColor: '#222222',
+            strokeOpacity: 0.9,
+            strokeStyle: 'solid',
+            zIndex: 111
+          })
+          let distance = this.getDistance(b, target)
+          let center = this.getCenter(b, target)
+          text = new Text({
+            text: distance,
+            anchor: 'center',
+            draggable: false,
+            style: {
+              'background': 'linear-gradient(180deg, #7E7E7E, #222222)',
+              'width': '60px',
+              'border-width': 0,
+              'text-align': 'center',
+              'font-size': '14px',
+              'color': '#FFFFFF',
+              'line-height': '24px',
+              'border-radius': '5px'
+            },
+            position: center
+          })
+          this.polylineList.push(polyline)
+          this.polylineList.push(text)
+        })
+        this.map.add(this.polylineList)
+      },
+      getDistance (b, t) {
+        let d = AMap.GeometryUtil.distance(new AMap.LngLat(b.longitude, b.latitude), new AMap.LngLat(t.longitude, t.latitude))
+        return Math.round(d / 100) / 10 + 'km'
+      },
+      getCenter (b, t) {
+        // var textPos = p1.divideBy(2).add(p2.divideBy(2));
+        let p1 = new AMap.LngLat(b.longitude, b.latitude)
+        let p2 = new AMap.LngLat(t.longitude, t.latitude)
+        return p1.divideBy(2).add(p2.divideBy(2))
       }
     }
   }
@@ -134,7 +203,10 @@
     height: 100%;
 
     .cube-btn {
+    }
 
+    .marker-business-name {
+      border: none !important;
     }
   }
 </style>
@@ -149,10 +221,12 @@
       box-sizing: border-box;
       position: absolute;
       width: 100%;
+
       z-index: 2;
       background: #ffffff;
       padding: 10px 16px;
       align-items: center;
+
 
     }
   }

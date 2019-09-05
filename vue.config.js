@@ -1,4 +1,5 @@
 module.exports = {
+  publicPath: 'c3-page',
   devServer: {
     proxy: {
       '/capitalization': {
