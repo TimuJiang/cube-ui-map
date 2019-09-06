@@ -8,6 +8,7 @@
     props: ['map'],
     data () {
       return {
+        citySearch: '',
         district: '',
         currentCity: '',
         currentProvince: '',
@@ -21,7 +22,9 @@
         subdistrict: 2,
         showbiz: false
       })
-      this.map.getCity(result => {
+      this.citySearch = new AMap.CitySearch()
+      this.citySearch.getLocalCity((status, result) => {
+        console.log(/result/, result)
         this.currentCity = result.city
         this.currentProvince = result.province
         this.init()

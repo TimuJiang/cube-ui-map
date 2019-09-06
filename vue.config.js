@@ -3,7 +3,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/capitalization': {
-        target: 'http://10.200.147.122:7109',
+        target: 'http://dt.test.geely.com',
         changeOrigin: true
       }
     }

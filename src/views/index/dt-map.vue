@@ -57,8 +57,6 @@
         this.map = new AMap.Map('dt-map__content', {
           resizeEnable: true
         })
-        // eslint-disable-next-line no-undef
-        this.mouseTool = new AMap.MouseTool(this.map)
       },
       onChangeCity (city) {
         this.map.setCity(city)
