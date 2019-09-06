@@ -6,6 +6,24 @@
 <script>
   export default {
     name: 'search-button',
+    props: {
+      jxs: {
+        type: Array,
+        default: function () {
+          return []
+        }
+      }
+    },
+    data() {
+      return {
+        selectedIndex: [0]
+      }
+    },
+    methods: {
+      changeHandler() {},
+      selectHandler() {},
+      cancelHandler() {}
+    }
   }
 </script>
 <style lang="scss" scoped>

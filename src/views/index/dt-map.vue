@@ -3,9 +3,22 @@
     #dt-map__content
     .tool-bar
       city-button(v-if="map && !search" :map="map" @change-city="onChangeCity")
-      brand-button(v-if="map && !search" :map="map" @change-city="onChangeBrand")
-      search-button(v-if="map && !search" :map="map" @click.native="onToggle")
+      brand-button(v-if="map && !search" :map="map" @change-brand="onChangeBrand")
+      search-button(v-if="map && !search" :map="map" @click.native="showDrawer")
       search-input(v-if="map && search" @close="onClose")
+    cube-drawer(
+      ref="drawer"
+      title="请选择"
+      :data="[jsxList]"
+      :style="{zIndex: 999}"
+    )
+      span(slot="title") 经销商
+      cube-drawer-panel(
+        :index="0"
+        :data="jsxList"
+      )
+        cube-drawer-item(v-for="(item, i) in jsxList" :item="item" :key="i" :index="i")
+          span {{item.name}}
 </template>
 
 <script>
@@ -54,10 +67,16 @@
         this.loadData()
         this.loadBusinessDistrict()
       },
-      onChangeBrand () {
+      onChangeBrand (brand) {
+        this.brand = brand.value
+        this.map.remove(this.jxsMarkerList)
+        this.addJxsList()
       },
       onToggle () {
         this.search = true
+      },
+      showDrawer() {
+        this.$refs.drawer.show()
       },
       onClose () {
         this.search = false
@@ -80,22 +99,25 @@
         this.jxsMarkerList = []
         let marker
         let icon
-        const { Icon, Size, Pixel, Marker, Polyline } = AMap
+        const { Icon, Size, Pixel, Marker } = AMap
         this.jsxList.forEach(j => {
-          // eslint-disable-next-line no-undef
-          let url = `./images/jxs_${j.brand}.png`
-          icon = new Icon({
-            size: new Size(18, 25),
-            image: url,
-            imageSize: new Size(18, 25)
-          })
-          marker = new Marker({
-            icon: icon,
-            zIndex: 110,
-            position: [j.longitude, j.latitude],
-            offset: new Pixel(-9, -25)
-          })
-          this.jxsMarkerList.push(marker)
+          if (j.longitude && j.latitude) {
+            if (!this.brand || this.brand === j.brand) {
+              let url = `./images/jxs_${j.brand}.png`
+              icon = new Icon({
+                size: new Size(18, 25),
+                image: url,
+                imageSize: new Size(18, 25)
+              })
+              marker = new Marker({
+                icon: icon,
+                zIndex: 110,
+                position: [j.longitude, j.latitude],
+                offset: new Pixel(-9, -25)
+              })
+              this.jxsMarkerList.push(marker)
+            }
+          }
         })
         this.map.add(this.jxsMarkerList)
         this.map.setFitView(this.jxsMarkerList, true, [20, 20, 20, 20])
@@ -108,36 +130,38 @@
         let text
         const { Icon, Size, Pixel, Marker, Text } = AMap
         this.businessList.forEach(j => {
-          this.businessMap[j.id] = j
-          let url = `./images/b-bg.png`
-          icon = new Icon({
-            size: new Size(90, 90),
-            image: url,
-            imageSize: new Size(90, 90)
-          })
-          marker = new Marker({
-            icon: icon,
-            position: [j.longitude, j.latitude],
-            offset: new Pixel(-45, -45)
-          })
-          text = new Text({
-            text: j.bussCircle,
-            anchor: 'center',
-            draggable: false,
-            style: {
-              'background': 'transparent',
-              'width': '60px',
-              'border-width': 0,
-              'text-align': 'center',
-              'font-size': '14px',
-              'word-break': 'break-all',
-              'white-space': 'pre-wrap',
-              'color': '#FFFFFF'
-            },
-            position: [j.longitude, j.latitude]
-          })
-          this.businessMarkerList.push(marker)
-          this.businessMarkerList.push(text)
+          if (j.longitude && j.latitude) {
+            this.businessMap[j.id] = j
+            let url = `./images/b-bg.png`
+            icon = new Icon({
+              size: new Size(90, 90),
+              image: url,
+              imageSize: new Size(90, 90)
+            })
+            marker = new Marker({
+              icon: icon,
+              position: [j.longitude, j.latitude],
+              offset: new Pixel(-45, -45)
+            })
+            text = new Text({
+              text: j.bussCircle,
+              anchor: 'center',
+              draggable: false,
+              style: {
+                'background': 'transparent',
+                'width': '60px',
+                'border-width': 0,
+                'text-align': 'center',
+                'font-size': '14px',
+                'word-break': 'break-all',
+                'white-space': 'pre-wrap',
+                'color': '#FFFFFF'
+              },
+              position: [j.longitude, j.latitude]
+            })
+            this.businessMarkerList.push(marker)
+            this.businessMarkerList.push(text)
+          }
         })
         this.map.add(this.businessMarkerList)
         this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
@@ -150,35 +174,37 @@
         this.polylineList = []
         const { Text, Polyline, LngLat } = AMap
         this.businessList.forEach(b => {
-          target = this.businessMap[b.connects]
-          polyline = new Polyline({
-            path: [[b.longitude, b.latitude], [target.longitude, target.latitude]],
-            borderWeight: 2,
-            strokeColor: '#222222',
-            strokeOpacity: 0.9,
-            strokeStyle: 'solid',
-            zIndex: 111
-          })
-          let distance = this.getDistance(b, target)
-          let center = this.getCenter(b, target)
-          text = new Text({
-            text: distance,
-            anchor: 'center',
-            draggable: false,
-            style: {
-              'background': 'linear-gradient(180deg, #7E7E7E, #222222)',
-              'width': '60px',
-              'border-width': 0,
-              'text-align': 'center',
-              'font-size': '14px',
-              'color': '#FFFFFF',
-              'line-height': '24px',
-              'border-radius': '5px'
-            },
-            position: center
-          })
-          this.polylineList.push(polyline)
-          this.polylineList.push(text)
+          if (b.connects) {
+            target = this.businessMap[b.connects]
+            polyline = new Polyline({
+              path: [[b.longitude, b.latitude], [target.longitude, target.latitude]],
+              borderWeight: 2,
+              strokeColor: '#222222',
+              strokeOpacity: 0.9,
+              strokeStyle: 'solid',
+              zIndex: 111
+            })
+            let distance = this.getDistance(b, target)
+            let center = this.getCenter(b, target)
+            text = new Text({
+              text: distance,
+              anchor: 'center',
+              draggable: false,
+              style: {
+                'background': 'linear-gradient(180deg, #7E7E7E, #222222)',
+                'width': '60px',
+                'border-width': 0,
+                'text-align': 'center',
+                'font-size': '14px',
+                'color': '#FFFFFF',
+                'line-height': '24px',
+                'border-radius': '5px'
+              },
+              position: center
+            })
+            this.polylineList.push(polyline)
+            this.polylineList.push(text)
+          }
         })
         this.map.add(this.polylineList)
       },

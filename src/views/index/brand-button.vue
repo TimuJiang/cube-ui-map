@@ -15,9 +15,9 @@
     },
     created () {
       this._brand = [
-        { text: '全部', value: 0 },
-        { text: '吉利', value: 1 },
-        { text: '领克', value: 2 }
+        { text: '全部', value: '' },
+        { text: '吉利', value: 'geely' },
+        { text: '领克', value: 'lynk' }
     ]
     },
     mounted () {
@@ -36,7 +36,9 @@
       },
       selectHandle (value, index, text) {
         let i = index[0]
+        this.currentIndex = i
         this.currentBrand = this._brand[i]
+        this.$emit('change-brand', this.currentBrand)
       },
       cancelHandle () {
       }
