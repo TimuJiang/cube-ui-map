@@ -1,6 +1,6 @@
 <template lang='pug'>
   .search-button
-    i.cubeic-search
+    i.cubeic-more
 </template>
 
 <script>
@@ -30,8 +30,8 @@
   .search-button {
     flex: 1;
     text-align: right;
-    .cubeic-search {
-      font-size: 24px;
+    .cubeic-more {
+      font-size: 18px;
       color: #666666;
     }
   }

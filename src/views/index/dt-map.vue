@@ -2,10 +2,9 @@
   .dt-map
     #dt-map__content
     .tool-bar
-      city-button(v-if="map && !search" :map="map" @change-city="onChangeCity")
-      brand-button(v-if="map && !search" :map="map" @change-brand="onChangeBrand")
-      search-button(v-if="map && !search" :map="map" @click.native="showDrawer")
-      search-input(v-if="map && search" @close="onClose")
+      city-button(v-if="map" :map="map" @change-city="onChangeCity")
+      brand-button(v-if="map" :map="map" @change-brand="onChangeBrand")
+      search-button(v-if="map" :map="map" @click.native="showDrawer")
     cube-drawer(
       ref="drawer"
       title="请选择"
@@ -25,7 +24,6 @@
   import CityButton from './city-button'
   import BrandButton from './brand-button'
   import SearchButton from './search-button'
-  import SearchInput from './search-input'
   import axios from 'axios'
   const lintStyle = {
     borderWeight: 2,
@@ -61,13 +59,12 @@
   }
   export default {
     name: 'dt-map',
-    components: { CityButton, BrandButton, SearchButton, SearchInput },
+    components: { CityButton, BrandButton, SearchButton },
     data () {
       return {
         map: '',
         mouseTool: '',
         geolocation: '',
-        search: false,
         brand: '',
         currentCity: '',
         jsxList: [],
@@ -103,14 +100,8 @@
         this.map.remove(this.jxsMarkerList)
         this.addJxsList()
       },
-      onToggle () {
-        this.search = true
-      },
       showDrawer() {
         this.$refs.drawer.show()
-      },
-      onClose () {
-        this.search = false
       },
       loadData () {
         axios.post('/capitalization/map/jxsList', { cityCode: this.currentCity })
