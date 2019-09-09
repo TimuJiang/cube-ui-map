@@ -4,6 +4,7 @@
     .tool-bar
       city-button(v-if="map" :map="map" @change-city="onChangeCity")
       brand-button(v-if="map" :map="map" @change-brand="onChangeBrand")
+      toggle-button(v-if="map" @toggle="onToggle" :visible="visible")
       search-button(v-if="map" :map="map" @click.native="showDrawer")
     cube-drawer(
       ref="drawer"
@@ -23,8 +24,10 @@
 <script>
   import CityButton from './city-button'
   import BrandButton from './brand-button'
+  import ToggleButton from './toggle-button'
   import SearchButton from './search-button'
   import axios from 'axios'
+
   const lintStyle = {
     borderWeight: 2,
     strokeColor: '#222222',
@@ -59,10 +62,11 @@
   }
   export default {
     name: 'dt-map',
-    components: { CityButton, BrandButton, SearchButton },
+    components: { CityButton, BrandButton, SearchButton, ToggleButton },
     data () {
       return {
         map: '',
+        visible: true,
         mouseTool: '',
         geolocation: '',
         brand: '',
@@ -81,6 +85,14 @@
       this.initMap()
     },
     methods: {
+      onToggle (value) {
+        this.visible = value
+        if (this.visible) {
+          this.map.add(this.polylineList)
+        } else {
+          this.map.remove(this.polylineList)
+        }
+      },
       initMap (type) {
         this.map && this.map.destroy()
         // eslint-disable-next-line no-undef
@@ -100,7 +112,7 @@
         this.map.remove(this.jxsMarkerList)
         this.addJxsList()
       },
-      showDrawer() {
+      showDrawer () {
         this.$refs.drawer.show()
       },
       loadData () {
@@ -193,7 +205,7 @@
         // this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
         this.drawPolyline()
       },
-      onClickBusinessMarker(e) {
+      onClickBusinessMarker (e) {
         if (this.tempPoint.length === 1 && this.tempPoint[0] === e.target.getPosition()) {
           const toast = this.$createToast({
             time: 2000,
@@ -230,7 +242,7 @@
           this.drawMarker.push(polyline)
           this.drawMarker.push(text)
         }
-       this.map.add(this.drawMarker)
+        this.map.add(this.drawMarker)
       },
       drawPolyline () {
         let target
