@@ -1,7 +1,7 @@
 <template lang='pug'>
   .city-button(:light="true"  @click="showAddressPicker" icon="cubeic-select")
     span {{currentCity}}
-    i.cubeic-pulldown
+    img.cubeic-pulldown(src="./down.png")
 </template>
 
 <script>
@@ -106,11 +106,18 @@
   .city-button {
     flex: 2;
     padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 16px;
     background: #EFF0F2;
     border-radius: 2px;
     color: #666666;
+    .cubeic-pulldown {
+      width: 13px;
+      height: 13px;
+    }
   }
 </style>
