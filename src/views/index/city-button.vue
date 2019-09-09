@@ -24,11 +24,14 @@
       })
       this.citySearch = new AMap.CitySearch()
       this.citySearch.getLocalCity((status, result) => {
-        console.log(/result/, result)
-        this.currentCity = result.city
-        this.currentProvince = result.province
-        this.init()
-        this.$emit('change-city', this.currentCity)
+        console.log(status)
+        console.log(result)
+        if (status === 'complete' && result.info === 'OK') {
+          this.currentCity = result.city
+          this.currentProvince = result.province
+          this.init()
+          this.$emit('change-city', this.currentCity)
+        }
       })
     },
     methods: {
@@ -93,7 +96,7 @@
   }
 </script>
 <style scoped>
-  .city-button  >>> .cubeic-select {
+  .city-button >>> .cubeic-select {
 
   }
 </style>
@@ -101,7 +104,7 @@
   .city-button {
     flex: 2;
     padding: 10px 16px;
-    overflow:hidden;
+    overflow: hidden;
     text-overflow: ellipsis;
   }
 </style>

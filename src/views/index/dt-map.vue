@@ -27,7 +27,38 @@
   import SearchButton from './search-button'
   import SearchInput from './search-input'
   import axios from 'axios'
-
+  const lintStyle = {
+    borderWeight: 2,
+    strokeColor: '#222222',
+    strokeOpacity: 0.9,
+    strokeStyle: 'solid'
+  }
+  const lineStyle2 = {
+    borderWeight: 2,
+    strokeColor: '#3d89ff',
+    strokeOpacity: 0.9,
+    strokeStyle: 'solid'
+  }
+  const textStyle = {
+    'background': 'linear-gradient(180deg, #3d89ff, #3d89ff)',
+    'width': '60px',
+    'border-width': 0,
+    'text-align': 'center',
+    'font-size': '14px',
+    'color': '#FFFFFF',
+    'line-height': '24px',
+    'border-radius': '5px'
+  }
+  const textStyle2 = {
+    'background': 'linear-gradient(180deg, #7E7E7E, #222222)',
+    'width': '60px',
+    'border-width': 0,
+    'text-align': 'center',
+    'font-size': '14px',
+    'color': '#FFFFFF',
+    'line-height': '24px',
+    'border-radius': '5px'
+  }
   export default {
     name: 'dt-map',
     components: { CityButton, BrandButton, SearchButton, SearchInput },
@@ -44,7 +75,9 @@
         businessList: [],
         businessMarkerList: [],
         businessMap: {},
-        polylineList: []
+        polylineList: [],
+        tempPoint: [],
+        drawMarker: []
       }
     },
     mounted () {
@@ -157,13 +190,44 @@
               },
               position: [j.longitude, j.latitude]
             })
+            text.on('click', this.onClickBusinessMarker, this)
             this.businessMarkerList.push(marker)
             this.businessMarkerList.push(text)
           }
         })
         this.map.add(this.businessMarkerList)
-        this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
+        // this.map.setFitView(this.businessMarkerList, true, [20, 20, 20, 20])
         this.drawPolyline()
+      },
+      onClickBusinessMarker(e) {
+        if (this.tempPoint.length === 2) {
+          this.tempPoint = []
+          this.map.remove(this.drawMarker)
+          this.drawMarker = []
+        }
+        if (this.tempPoint.length < 1) {
+          this.tempPoint.push(e.lnglat)
+        } else {
+          this.tempPoint.push(e.lnglat)
+          const { Text, Polyline } = AMap
+          const polyline = new Polyline({
+            path: this.tempPoint,
+            ...lineStyle2,
+            zIndex: 113
+          })
+          let distance = this.getDistance(this.tempPoint[0], this.tempPoint[1])
+          let center = this.getCenter(this.tempPoint[0], this.tempPoint[1])
+          const text = new Text({
+            text: distance,
+            anchor: 'center',
+            draggable: false,
+            style: textStyle,
+            position: center
+          })
+          this.drawMarker.push(polyline)
+          this.drawMarker.push(text)
+        }
+       this.map.add(this.drawMarker)
       },
       drawPolyline () {
         let target
@@ -176,28 +240,16 @@
             target = this.businessMap[b.connects]
             polyline = new Polyline({
               path: [[b.longitude, b.latitude], [target.longitude, target.latitude]],
-              borderWeight: 2,
-              strokeColor: '#222222',
-              strokeOpacity: 0.9,
-              strokeStyle: 'solid',
+              ...lintStyle,
               zIndex: 111
             })
-            let distance = this.getDistance(b, target)
-            let center = this.getCenter(b, target)
+            let distance = this.getDistance(new LngLat(b.longitude, b.latitude), new LngLat(target.longitude, target.latitude))
+            let center = this.getCenter(new LngLat(b.longitude, b.latitude), new LngLat(target.longitude, target.latitude))
             text = new Text({
               text: distance,
               anchor: 'center',
               draggable: false,
-              style: {
-                'background': 'linear-gradient(180deg, #7E7E7E, #222222)',
-                'width': '60px',
-                'border-width': 0,
-                'text-align': 'center',
-                'font-size': '14px',
-                'color': '#FFFFFF',
-                'line-height': '24px',
-                'border-radius': '5px'
-              },
+              style: textStyle2,
               position: center
             })
             this.polylineList.push(polyline)
@@ -207,14 +259,11 @@
         this.map.add(this.polylineList)
       },
       getDistance (b, t) {
-        let d = AMap.GeometryUtil.distance(new AMap.LngLat(b.longitude, b.latitude), new AMap.LngLat(t.longitude, t.latitude))
+        let d = AMap.GeometryUtil.distance(b, t)
         return Math.round(d / 100) / 10 + 'km'
       },
       getCenter (b, t) {
-        // var textPos = p1.divideBy(2).add(p2.divideBy(2));
-        let p1 = new AMap.LngLat(b.longitude, b.latitude)
-        let p2 = new AMap.LngLat(t.longitude, t.latitude)
-        return p1.divideBy(2).add(p2.divideBy(2))
+        return b.divideBy(2).add(t.divideBy(2))
       }
     }
   }
