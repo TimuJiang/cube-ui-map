@@ -151,7 +151,7 @@
         let icon
         let text
         const { Icon, Size, Pixel, Marker, Text } = AMap
-        this.businessList.forEach(j => {
+        this.businessList.forEach((j, index) => {
           if (j.longitude && j.latitude) {
             this.businessMap[j.id] = j
             let url = `./images/b-bg.png`
@@ -179,6 +179,9 @@
                 'white-space': 'pre-wrap',
                 'color': '#FFFFFF'
               },
+              extData: {
+                index
+              },
               position: [j.longitude, j.latitude]
             })
             text.on('click', this.onClickBusinessMarker, this)
@@ -191,15 +194,24 @@
         this.drawPolyline()
       },
       onClickBusinessMarker(e) {
+        if (this.tempPoint.length === 1 && this.tempPoint[0] === e.target.getPosition()) {
+          const toast = this.$createToast({
+            time: 2000,
+            type: 'warn',
+            txt: '不能连接自己'
+          })
+          toast.show()
+          return
+        }
         if (this.tempPoint.length === 2) {
           this.tempPoint = []
           this.map.remove(this.drawMarker)
           this.drawMarker = []
         }
         if (this.tempPoint.length < 1) {
-          this.tempPoint.push(e.lnglat)
+          this.tempPoint.push(e.target.getPosition())
         } else {
-          this.tempPoint.push(e.lnglat)
+          this.tempPoint.push(e.target.getPosition())
           const { Text, Polyline } = AMap
           const polyline = new Polyline({
             path: this.tempPoint,
