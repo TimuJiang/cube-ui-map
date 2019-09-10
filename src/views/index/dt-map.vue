@@ -60,6 +60,29 @@
     'line-height': '24px',
     'border-radius': '5px'
   }
+
+  const textStyle3 = {
+    'background': 'transparent',
+    'width': '60px',
+    'border-width': 0,
+    'text-align': 'center',
+    'font-size': '14px',
+    'word-break': 'break-all',
+    'white-space': 'pre-wrap',
+    'color': '#FFFFFF'
+  }
+
+  const selectStyle = {
+    'background': 'transparent',
+    'width': '60px',
+    'border-width': 0,
+    'text-align': 'center',
+    'font-size': '14px',
+    'word-break': 'break-all',
+    'white-space': 'pre-wrap',
+    'color': '#2074ff'
+  }
+
   export default {
     name: 'dt-map',
     components: { CityButton, BrandButton, SearchButton, ToggleButton },
@@ -77,8 +100,8 @@
         businessMarkerList: [],
         businessMap: {},
         polylineList: [],
-        tempPoint: [],
-        drawMarker: []
+        startPoint: '',
+        customLineMap: {}
       }
     },
     mounted () {
@@ -106,6 +129,7 @@
         this.map.clearMap()
         this.loadData()
         this.loadBusinessDistrict()
+        this.customLineMap = {}
       },
       onChangeBrand (brand) {
         this.brand = brand.value
@@ -181,16 +205,7 @@
               text: j.bussCircle,
               anchor: 'center',
               draggable: false,
-              style: {
-                'background': 'transparent',
-                'width': '60px',
-                'border-width': 0,
-                'text-align': 'center',
-                'font-size': '14px',
-                'word-break': 'break-all',
-                'white-space': 'pre-wrap',
-                'color': '#FFFFFF'
-              },
+              style: textStyle3,
               extData: {
                 index
               },
@@ -206,43 +221,79 @@
         this.drawPolyline()
       },
       onClickBusinessMarker (e) {
-        if (this.tempPoint.length === 1 && this.tempPoint[0] === e.target.getPosition()) {
-          const toast = this.$createToast({
-            time: 2000,
-            type: 'warn',
-            txt: '不能连接自己'
-          })
-          toast.show()
-          return
-        }
-        if (this.tempPoint.length === 2) {
-          this.tempPoint = []
-          this.map.remove(this.drawMarker)
-          this.drawMarker = []
-        }
-        if (this.tempPoint.length < 1) {
-          this.tempPoint.push(e.target.getPosition())
+        if (!this.startPoint) {
+          this.startPoint = e.target
+          this.startPoint.setStyle(selectStyle)
         } else {
-          this.tempPoint.push(e.target.getPosition())
-          const { Text, Polyline } = AMap
-          const polyline = new Polyline({
-            path: this.tempPoint,
-            ...lineStyle2,
-            zIndex: 113
-          })
-          let distance = this.getDistance(this.tempPoint[0], this.tempPoint[1])
-          let center = this.getCenter(this.tempPoint[0], this.tempPoint[1])
-          const text = new Text({
-            text: distance,
-            anchor: 'center',
-            draggable: false,
-            style: textStyle,
-            position: center
-          })
-          this.drawMarker.push(polyline)
-          this.drawMarker.push(text)
+          if (this.startPoint === e.target) {
+            // todo 点击同一个
+            this.startPoint.setStyle(textStyle3)
+            this.startPoint = null
+          } else {
+            // todo 添加连线
+
+            const line = this.getLineAndText(this.startPoint, e.target)
+            if (line) {
+              this.map.add([line.polyline, line.text])
+              this.startPoint.setStyle(textStyle3)
+              e.target.setStyle(textStyle3)
+              this.startPoint = null
+            }
+          }
         }
-        this.map.add(this.drawMarker)
+      },
+      sort (a, b) {
+        if (a > b) {
+          return 1
+        } else {
+          return -1
+        }
+      },
+      getLineAndText (start, end) {
+        if (!start || !end) return
+        const id = [start.getExtData().index, end.getExtData().index].sort(this.sort).toString()
+        if (this.customLineMap[id]) return
+        const pos1 = start.getPosition()
+        const pos2 = end.getPosition()
+        const { Text, Polyline } = AMap
+        const polyline = new Polyline({
+          path: [pos1, pos2],
+          ...lineStyle2,
+          zIndex: 113,
+          extData: {
+            id: id
+          }
+        })
+        let distance = this.getDistance(pos1, pos2)
+        let center = this.getCenter(pos1, pos2)
+        const text = new Text({
+          text: distance,
+          anchor: 'center',
+          draggable: false,
+          style: textStyle,
+          position: center,
+          extData: {
+            id: id
+          }
+        })
+        text.on('click', this.onDeleteCustom, this)
+        this.customLineMap[id] = {
+          text,
+          polyline
+        }
+        return {
+          id,
+          polyline,
+          text
+        }
+      },
+      onDeleteCustom (e) {
+        const id = e.target.getExtData().id
+        let c = this.customLineMap[id]
+        if (c) {
+          this.map.remove([c.text, c.polyline])
+          this.customLineMap[id] = null
+        }
       },
       drawPolyline () {
         let target
@@ -296,6 +347,10 @@
     .marker-business-name {
       border: none !important;
     }
+
+    .amap-marker-content {
+      /*pointer-events: none !important;*/
+    }
   }
 </style>
 <style lang="scss" scoped>
@@ -309,13 +364,10 @@
       box-sizing: border-box;
       position: absolute;
       width: 100%;
-
       z-index: 2;
       background: #ffffff;
       padding: 10px 16px;
       align-items: center;
-
-
     }
   }
 </style>

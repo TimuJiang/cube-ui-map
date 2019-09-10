@@ -19,6 +19,7 @@
       this._brand = [
         { text: '全部', value: '' },
         { text: '吉利', value: 'geely' },
+        { text: '几何', value: 'geometry' },
         { text: '领克', value: 'lynk' }
     ]
     },
